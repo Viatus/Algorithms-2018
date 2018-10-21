@@ -1,8 +1,6 @@
 package lesson1;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Random;
+import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
 public class Sorts {
@@ -12,10 +10,10 @@ public class Sorts {
             T current = elements[i];
             int j = i - 1;
             for (; j >= 0; j--) {
-                if (elements[j].compareTo(current) > 0) elements[j+1] = elements[j];
+                if (elements[j].compareTo(current) > 0) elements[j + 1] = elements[j];
                 else break;
             }
-            elements[j+1] = current;
+            elements[j + 1] = current;
         }
     }
 
@@ -24,10 +22,10 @@ public class Sorts {
             int current = elements[i];
             int j = i - 1;
             for (; j >= 0; j--) {
-                if (elements[j] > current) elements[j+1] = elements[j];
+                if (elements[j] > current) elements[j + 1] = elements[j];
                 else break;
             }
-            elements[j+1] = current;
+            elements[j + 1] = current;
         }
     }
 
@@ -38,8 +36,7 @@ public class Sorts {
         for (int i = begin; i < end; i++) {
             if (li < left.length && (ri == right.length || left[li] <= right[ri])) {
                 elements[i] = left[li++];
-            }
-            else {
+            } else {
                 elements[i] = right[ri++];
             }
         }
@@ -128,7 +125,7 @@ public class Sorts {
 
     public static int[] countingSort(int[] elements, int limit) {
         int[] count = new int[limit + 1];
-        for (int element: elements) {
+        for (int element : elements) {
             count[element]++;
         }
         for (int j = 1; j <= limit; j++) {
@@ -141,4 +138,40 @@ public class Sorts {
         }
         return out;
     }
+
+
+    public static <T extends Comparable<T>> void quickSort(T[] elements) {
+        quickSort(elements, 0, elements.length - 1);
+    }
+
+    public static <T extends Comparable<T>> void quickSort(T[] elements, int min, int max) {
+        if (min < max) {
+            int border = partition(elements, min, max);
+            quickSort(elements, min, border);
+            quickSort(elements, border + 1, max);
+        }
+    }
+
+    private static <T extends Comparable<T>> int partition(T[] elements, int min, int max) {
+        T x = elements[min + random.nextInt(max - min + 1)];
+        int left = min, right = max;
+        while (left <= right) {
+            while (elements[left].compareTo(x) < 0) {
+                left++;
+            }
+            while (elements[right].compareTo(x) > 0) {
+                right--;
+            }
+            if (left <= right) {
+                T temp = elements[left];
+                elements[left] = elements[right];
+                elements[right] = temp;
+                left++;
+                right--;
+            }
+        }
+        return right;
+    }
+
+
 }
