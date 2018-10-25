@@ -62,8 +62,10 @@ public class JavaTasks {
         } catch (IOException ex) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
-    }     //Трудоемкость O(NlogN),где N- количество строчек в входном файле, так как используется quicksort, а также цикл на N элементов
-    // Ресурсоемкость O(N), так как используется список и массив, размером N элементов
+    }
+    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(N), так как в программе
+    //создаются массивы и списки, длина наибольшего из которых равна N, а количество массивов и списков от N е зависит.
+    //N - количество строк в входном файле
 
     /**
      * Сортировка адресов
@@ -136,7 +138,6 @@ public class JavaTasks {
         } catch (IOException e) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
-
         Double[] temperaturesArray = new Double[temperatures.size()];
         for (int i = 0; i < temperatures.size(); i++) {
             temperaturesArray[i] = Double.valueOf(temperatures.get(i));
@@ -151,6 +152,9 @@ public class JavaTasks {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
     }
+    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(N), так как в программе
+    //создаются массивы и списки, длина наибольшего из которых равна N, а количество массивов и списков от N е зависит.
+    //N - количество строк в входном файле
 
     /**
      * Сортировка последовательности
@@ -198,22 +202,22 @@ public class JavaTasks {
                 max = number;
             }
         }
-        Integer[] count = new Integer[max + 1];
+        int[] count = new int[max + 1];
         for (int i = 0; i < count.length; i++) {
             count[i] = 0;
         }
         for (int number : numbers) {
             count[number]++;
         }
-        int max2 = 0;
+        max = 0;
         for (int c : count) {
-            if (c > max2) {
-                max2 = c;
+            if (c > max) {
+                max = c;
             }
         }
         List<Integer> mostCommon = new ArrayList<>();
         for (int i = 0; i < count.length; i++) {
-            if (count[i] == max2) {
+            if (count[i] == max) {
                 mostCommon.add(i);
             }
         }
@@ -228,7 +232,7 @@ public class JavaTasks {
                     fw.write(number.toString() + "\n");
                 }
             }
-            for (int i = 0; i < max2; i++) {
+            for (int i = 0; i < max; i++) {
                 fw.write(mostCommonArray[0].toString() + "\n");
             }
             fw.close();
@@ -236,6 +240,9 @@ public class JavaTasks {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
     }
+    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(N), так как в программе
+    //создаются массивы и списки, длина наибольшего из которых равна N, а количество массивов и списков от N не зависит.
+    //N - количество строк в входном файле
 
     /**
      * Соединить два отсортированных массива в один
@@ -252,28 +259,8 @@ public class JavaTasks {
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        for (int i = first.length; i < second.length; i++) {
-            int counter = i - first.length;
-            int j = 0;
-            while (second[i].compareTo(first[j]) > 0 && j < first.length - 1) {
-                j++;
-                counter++;
-            }
-            if (j == first.length - 1) {
-                if (second[i].compareTo(first[j]) > 0) {
-                    counter++;
-                }
-            }
-            T swapSupport = second[i];
-            second[i] = null;
-            second[counter] = swapSupport;
-        }
-        int j = 0;
-        for (int i = 0; i < second.length; i++) {
-            if (second[i] == null) {
-                second[i] = first[j];
-                j++;
-            }
-        }
+        System.arraycopy(first,0,second,0,first.length);
+        Sorts.quickSort(second);
     }
+    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(0), так как не создаются новые переменные
 }

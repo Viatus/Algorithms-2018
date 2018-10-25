@@ -1,14 +1,10 @@
 package lesson2;
 
-import kotlin.NotImplementedError;
 import kotlin.Pair;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaAlgorithms {
@@ -62,6 +58,9 @@ public class JavaAlgorithms {
         }
         return maxPair;
     }
+    //Трудоемкость - O(N), так как наиболее трудозатратным является цикл перебора N элементов
+    //Ресурсоемкость - O(N), так как создается список размера N
+    //N - количество строк в входном файле
 
     /**
      * Задача Иосифа Флафия.
@@ -110,26 +109,27 @@ public class JavaAlgorithms {
      * Х х Х
      */
     static public int josephTask(int menNumber, int choiceInterval) {
-        Men startingMen = new Men(1);
-        Men men = startingMen;
+        Man startingMan = new Man(1);
+        Man currentMan = startingMan;
         for (int i = 2; i <= menNumber; i++) {
-            men = (men.next = new Men(i));
+            currentMan = (currentMan.next = new Man(i));
         }
-        men.next = startingMen;
-        while (men != men.next) {
+        currentMan.next = startingMan;
+        while (currentMan != currentMan.next) {
             for (int i = 1; i < choiceInterval; i++) {
-                men = men.next;
+                currentMan = currentMan.next;
             }
-            men.next = men.next.next;
+            currentMan.next = currentMan.next.next;
         }
-        return men.number;
+        return currentMan.number;
     }
+    //Трудоемкость - O(menNumber * choiceInterval), ресурсоемкость - O(menNumber)
 
-    static public class Men {
+    static private class Man {
         int number;
-        Men next;
+        Man next;
 
-        Men(int n) {
+        Man(int n) {
             number = n;
         }
     }
@@ -154,7 +154,7 @@ public class JavaAlgorithms {
         }
         for (int i = 0; i < first.length(); i++) {
             for (int j = 0; j < second.length(); j++) {
-                if (first.substring(i, i + 1).equals(second.substring(j, j + 1))) {
+                if (first.charAt(i) == (second.charAt(j))) {
                     if (i >= 1 && j >= 1) {
                         matrix[i][j] = matrix[i - 1][j - 1] + 1;
                     } else {
@@ -175,6 +175,8 @@ public class JavaAlgorithms {
         }
         return first.substring(maxIndex - max, maxIndex);
     }
+    //Трудоемкость - O(n*m), где n - длина первого слова, а m - второго
+    //Ресурсоемкость - O(m*n), так как создается массив m на n элементов
 
     /**
      * Число простых чисел в интервале
@@ -210,6 +212,7 @@ public class JavaAlgorithms {
         }
         return count;
     }
+    //Трудоемкость - O(N^2), где N - limit/2, ресурсоемкость - O(limit)
 
     /**
      * Балда
@@ -238,6 +241,84 @@ public class JavaAlgorithms {
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
     static public Set<String> baldaSearcher(String inputName, Set<String> words) {
-        throw new NotImplementedError();
+        List<List<String>> letters = new ArrayList<>();
+        Set<String> foundWords = new HashSet<>();
+        try (FileReader fr = new FileReader(inputName)) {
+            Scanner scan = new Scanner(fr);
+            while (scan.hasNextLine()) {
+                String[] parts = scan.nextLine().split(" ");
+                letters.add(Arrays.asList(parts));
+            }
+            fr.close();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Неверный форамт входного файла");
+        }
+        for (int i = 0; i < letters.size(); i++) {
+            for (int j = 0; j < letters.get(i).size(); j++) {
+                for (String word : words) {
+                    if (!foundWords.contains(word)) {
+                        if (letters.get(i).get(j).substring(0, 1).equalsIgnoreCase(word.substring(0, 1))) {
+                            if (isWordFound(letters, i, j, 1, word, -1, -1)) {
+                                foundWords.add(word);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return foundWords;
     }
+    //Трудоемкость - (n*m*w*l), ресурсоемкость - O(n*m + w), где n- длина матрицы, m - ее ширина, w- количество искомых слов,
+    //а l - наибольшее количество совпавших подряд букв
+
+    static private List<Character> nearbyLetters(List<List<String>> letters, int line, int number, int previousLetterLine, int previousLetterNumber) {
+        List<Character> list = new ArrayList<>();
+        if (line > 0 && (line - 1 != previousLetterLine || number != previousLetterNumber)) {
+            list.add(letters.get(line - 1).get(number).charAt(0));
+        } else {
+            list.add('-');
+        }
+        if (number < letters.get(line).size() - 1 && (line != previousLetterLine || number + 1 != previousLetterNumber)) {
+            list.add(letters.get(line).get(number + 1).charAt(0));
+        } else {
+            list.add('-');
+        }
+        if (line < letters.size() - 1 && (line + 1 != previousLetterLine || number != previousLetterNumber)) {
+            list.add(letters.get(line + 1).get(number).charAt(0));
+        } else {
+            list.add('-');
+        }
+        if (number > 0 && (line != previousLetterLine || number - 1 != previousLetterNumber)) {
+            list.add(letters.get(line).get(number - 1).charAt(0));
+        } else {
+            list.add('-');
+        }
+        return list;
+    }
+
+    static private boolean isWordFound(List<List<String>> letters, int line, int number, int numberInWord, String word, int previousLetterLine, int previousLetterNumber) {
+        if (numberInWord == word.length()) {
+            return true;
+        }
+        List<Character> list = nearbyLetters(letters, line, number, previousLetterLine, previousLetterNumber);
+        if (list.contains(word.charAt(numberInWord))) {
+            boolean firstCase = false, secondCase = false, thirdCase = false, fourthCase = false;
+            if (list.get(0) == word.charAt(numberInWord)) {
+                firstCase = isWordFound(letters, line - 1, number, numberInWord + 1, word, line, number);
+            }
+            if (list.get(1) == word.charAt(numberInWord)) {
+
+                secondCase = isWordFound(letters, line, number + 1, numberInWord + 1, word, line, number);
+            }
+            if (list.get(2) == word.charAt(numberInWord)) {
+                thirdCase = isWordFound(letters, line + 1, number, numberInWord + 1, word, line, number);
+            }
+            if (list.get(3) == word.charAt(numberInWord)) {
+                fourthCase = isWordFound(letters, line, number - 1, numberInWord + 1, word, line, number);
+            }
+            return firstCase || secondCase || thirdCase || fourthCase;
+        }
+        return false;
+    }
+
 }
