@@ -109,30 +109,13 @@ public class JavaAlgorithms {
      * Х х Х
      */
     static public int josephTask(int menNumber, int choiceInterval) {
-        Man startingMan = new Man(1);
-        Man currentMan = startingMan;
-        for (int i = 2; i <= menNumber; i++) {
-            currentMan = (currentMan.next = new Man(i));
+        int result = 0;
+        for (int i = 1; i <= menNumber; i++) {
+            result = (result + choiceInterval) % i;
         }
-        currentMan.next = startingMan;
-        while (currentMan != currentMan.next) {
-            for (int i = 1; i < choiceInterval; i++) {
-                currentMan = currentMan.next;
-            }
-            currentMan.next = currentMan.next.next;
-        }
-        return currentMan.number;
+        return result + 1;
     }
-    //Трудоемкость - O(menNumber * choiceInterval), ресурсоемкость - O(menNumber)
-
-    static private class Man {
-        int number;
-        Man next;
-
-        Man(int n) {
-            number = n;
-        }
-    }
+    //Трудоемкость - O(menNumber), ресурсоемкость - O(1)
 
     /**
      * Наибольшая общая подстрока.
