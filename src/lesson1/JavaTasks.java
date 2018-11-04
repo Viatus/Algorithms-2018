@@ -141,12 +141,12 @@ public class JavaTasks {
             temperatures.put(i, 0);
         }
         for (Double temperature : temperaturesInput) {
-            temperatures.put(temperature*10, temperatures.get(temperature*10) + 1);
+            temperatures.put(temperature * 10, temperatures.get(temperature * 10) + 1);
         }
         try (FileWriter fw = new FileWriter(outputName)) {
             for (Double i = -2730.0; i <= 5000.0; i = i + 1) {
                 for (int j = 0; j < temperatures.get(i); j++) {
-                    fw.write(i/10 + "\n");
+                    fw.write(i / 10 + "\n");
                 }
             }
             fw.close();
