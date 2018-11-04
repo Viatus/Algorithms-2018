@@ -3,9 +3,7 @@ package lesson1;
 import kotlin.NotImplementedError;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
@@ -37,7 +35,7 @@ public class JavaTasks {
      * <p>
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortTimes(String inputName, String outputName) throws Exception {
+    static public void sortTimes(String inputName, String outputName) {
         List<Integer> times = new ArrayList<>();
         try (FileReader fr = new FileReader(inputName)) {
             Scanner scan = new Scanner(fr);
@@ -128,32 +126,35 @@ public class JavaTasks {
      * 121.3
      */
     static public void sortTemperatures(String inputName, String outputName) {
-        List<String> temperatures = new ArrayList<>();
+        List<Double> temperaturesInput = new ArrayList<>();
         try (FileReader fr = new FileReader(inputName)) {
             Scanner scan = new Scanner(fr);
             while (scan.hasNextLine()) {
-                temperatures.add(scan.nextLine());
+                temperaturesInput.add(Double.valueOf(scan.nextLine()));
             }
             fr.close();
         } catch (IOException e) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
-        Double[] temperaturesArray = new Double[temperatures.size()];
-        for (int i = 0; i < temperatures.size(); i++) {
-            temperaturesArray[i] = Double.valueOf(temperatures.get(i));
+        Map<Double, Integer> temperatures = new HashMap<>();
+        for (Double i = -2730.0; i <= 5000.0; i = i + 1) {
+            temperatures.put(i, 0);
         }
-        Sorts.quickSort(temperaturesArray);
+        for (Double temperature : temperaturesInput) {
+            temperatures.put(temperature*10, temperatures.get(temperature*10) + 1);
+        }
         try (FileWriter fw = new FileWriter(outputName)) {
-            for (Double temperature : temperaturesArray) {
-                fw.write(temperature.toString() + "\n");
+            for (Double i = -2730.0; i <= 5000.0; i = i + 1) {
+                for (int j = 0; j < temperatures.get(i); j++) {
+                    fw.write(i/10 + "\n");
+                }
             }
             fw.close();
         } catch (IOException ex) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
     }
-    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(N), так как в программе
-    //создаются массивы и списки, длина наибольшего из которых равна N, а количество массивов и списков от N е зависит.
+    //Трудоемкость - O(N), ресурсоемкость - O(1), так как в размер temperatures не зависити от N
     //N - количество строк в входном файле
 
     /**
@@ -196,51 +197,40 @@ public class JavaTasks {
         } catch (IOException e) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int number : numbers) {
+            if (count.get(number) == null) {
+                count.put(number, 1);
+            } else {
+                count.put(number, count.get(number) + 1);
+            }
+        }
         int max = 0;
-        for (int number : numbers) {
-            if (number > max) {
-                max = number;
+        int maxNumber = 0;
+        for (Map.Entry<Integer, Integer> entry : count.entrySet()) {
+            if (entry.getValue() >= max) {
+                if (entry.getValue() == max && entry.getKey() > maxNumber) {
+                    continue;
+                }
+                max = entry.getValue();
+                maxNumber = entry.getKey();
             }
         }
-        int[] count = new int[max + 1];
-        for (int i = 0; i < count.length; i++) {
-            count[i] = 0;
-        }
-        for (int number : numbers) {
-            count[number]++;
-        }
-        max = 0;
-        for (int c : count) {
-            if (c > max) {
-                max = c;
-            }
-        }
-        List<Integer> mostCommon = new ArrayList<>();
-        for (int i = 0; i < count.length; i++) {
-            if (count[i] == max) {
-                mostCommon.add(i);
-            }
-        }
-        Integer[] mostCommonArray = new Integer[mostCommon.size()];
-        for (int i = 0; i < mostCommon.size(); i++) {
-            mostCommonArray[i] = mostCommon.get(i);
-        }
-        Sorts.quickSort(mostCommonArray);
         try (FileWriter fw = new FileWriter(outputName)) {
             for (Integer number : numbers) {
-                if (!number.equals(mostCommonArray[0])) {
+                if (number != maxNumber) {
                     fw.write(number.toString() + "\n");
                 }
             }
             for (int i = 0; i < max; i++) {
-                fw.write(mostCommonArray[0].toString() + "\n");
+                fw.write(maxNumber + "\n");
             }
             fw.close();
         } catch (IOException ex) {
             throw new IllegalArgumentException("Неверный форамт входного файла");
         }
     }
-    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(N), так как в программе
+    //Трудоемкость - O(N), ресурсоемкость - O(N), так как в программе
     //создаются массивы и списки, длина наибольшего из которых равна N, а количество массивов и списков от N не зависит.
     //N - количество строк в входном файле
 
@@ -259,8 +249,26 @@ public class JavaTasks {
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        System.arraycopy(first,0,second,0,first.length);
-        Sorts.quickSort(second);
+        int firstIndex = 0;
+        int secondIndex = first.length;
+        for (int i = 0; i < second.length; i++) {
+            if (firstIndex < first.length && secondIndex < second.length) {
+                if (first[firstIndex].compareTo(second[secondIndex]) < 0) {
+                    second[i] = first[firstIndex];
+                    firstIndex++;
+                } else {
+                    second[i] = second[secondIndex];
+                    secondIndex++;
+                }
+            } else {
+                if (firstIndex < first.length) {
+                    second[i] = first[firstIndex];
+                    firstIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
     }
-    //Трудоемкость - O(NlogN), так как самой трудозатратной является сортировка, ресурсоемкость - O(0), так как не создаются новые переменные
+    //Трудоемкость - O(N), где N - длина second, ресурсоемкость - O(1)
 }

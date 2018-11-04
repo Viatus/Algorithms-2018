@@ -195,7 +195,8 @@ public class JavaAlgorithms {
         }
         return count;
     }
-    //Трудоемкость - O(N^2), где N - limit/2, ресурсоемкость - O(limit)
+    //Трудоемкость - O(NlogN), где N - limit/2, так как трудоемкость внешнего цикла - O(N), а внутреннего logN
+    //Ресурсоемкость - O(limit)
 
     /**
      * Балда
