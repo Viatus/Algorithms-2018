@@ -99,12 +99,19 @@ public class JavaGraphTasks {
      */
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
         Map<Set<Graph.Vertex>, Boolean> setsWithIndependence = new HashMap<>();
-        for (Graph.Vertex vertex : graph.getVertices()) {
-            setsWithIndependence.put(new HashSet<>(Collections.singleton(vertex)), true);
-        }
         List<Set<Graph.Vertex>> previous = new ArrayList<>();
+        int minConnections = graph.getConnections((Graph.Vertex) graph.getVertices().toArray()[0]).size();
         for (Graph.Vertex vertex : graph.getVertices()) {
-            previous.add(new HashSet<>(Collections.singleton(vertex)));
+            if (graph.getConnections(vertex).size() < minConnections) {
+                minConnections = graph.getConnections(vertex).size();
+            }
+        }
+        for (Graph.Vertex vertex : graph.getVertices()) {
+            if (graph.getConnections(vertex).size() == minConnections) {
+                setsWithIndependence.put(new HashSet<>(Collections.singleton(vertex)), true);
+                previous.add(new HashSet<>(Collections.singleton(vertex)));
+
+            }
         }
         for (int i = 0; i < graph.getVertices().size() - 1; i++) {
             List<Set<Graph.Vertex>> newPrevious = new ArrayList<>();
@@ -115,7 +122,8 @@ public class JavaGraphTasks {
                         newSet.add(addingVertex);
                         if (!previous.contains(newSet) && !newPrevious.contains(newSet)) {
                             newPrevious.add(newSet);
-                            setsWithIndependence.put(newSet, setsWithIndependence.get(set) && isIndependent(graph, set, addingVertex));
+                            setsWithIndependence.put(newSet, setsWithIndependence.get(set)
+                                    && isIndependent(graph, set, addingVertex));
                         }
                     }
                 }
@@ -133,13 +141,15 @@ public class JavaGraphTasks {
         return maxSet;
     }
 
-    //Трудоемкость - O(2^V*E), так как наиболее трудоемкой частью является перебор всех 2^V подмножеств множества вершин,
+    //Трудоемкость - O(I*2^V*E/V), где I - количество вершин с наименьшим количеством соседей, так как наиболее трудоемкой
+    // частью является перебор всех 2^V подмножеств множества вершин,
     //внутри которого вызывается функция проверки независимости элемента относительно множества трудоемкостью O(E),
     //Ресурсоемкость - O(2^V), потому что создатеся ассоциативный массив, размером в количество всех подмножеств
 
     private static boolean isIndependent(Graph graph, Set<Graph.Vertex> set, Graph.Vertex vertex) {
         for (Graph.Edge edge : graph.getEdges()) {
-            if (edge.getBegin() == vertex && set.contains(edge.getEnd()) || edge.getEnd() == vertex && set.contains(edge.getBegin())) {
+            if (edge.getBegin() == vertex && set.contains(edge.getEnd())
+                    || edge.getEnd() == vertex && set.contains(edge.getBegin())) {
                 return false;
             }
         }
@@ -182,7 +192,7 @@ public class JavaGraphTasks {
                 for (Graph.Vertex v : graph.getNeighbors(current)) {
                     if (!closed.contains(v) && !open.contains(v)) {
                         open.add(v);
-                        cameFrom.put(v, current);                                  //Трудоемкость O(V + E)
+                        cameFrom.put(v, current);
                         costSoFar.put(v, costSoFar.get(current) + 1);
                         break;
                     }
@@ -192,7 +202,7 @@ public class JavaGraphTasks {
             Graph.Vertex maxVertex = (Graph.Vertex) closed.toArray()[0];
             for (Map.Entry<Graph.Vertex, Integer> entry : costSoFar.entrySet()) {
                 if (entry.getValue() > max) {
-                    max = entry.getValue();                                                  //Трудоемкость O(V)
+                    max = entry.getValue();
                     maxVertex = entry.getKey();
                 }
             }
@@ -200,7 +210,7 @@ public class JavaGraphTasks {
             list.add(maxVertex);
             while (cameFrom.get(maxVertex) != null) {
                 list.add(cameFrom.get(maxVertex));
-                maxVertex = cameFrom.get(maxVertex);                                        //Трудоемкость O(V)
+                maxVertex = cameFrom.get(maxVertex);
             }
             if (list.size() > possiblePath.size()) {
                 possiblePath = list;
@@ -210,5 +220,5 @@ public class JavaGraphTasks {
     }
 }
 
-//Трудоемкость - O(V(V+E)), ресурсоемкость O(V+E), так как поиск в ширину имеет ресурсоемкость O(V+E), а остальные
-//элементы в цикле имеют ресурсоемкость O(V) или O(1)
+//Трудоемкость - O(V*2^L*L!), где L - длина самого длинного пути, ресурсоемкость O(V+E), так как поиск в ширину имеет
+// ресурсоемкость O(V+E), а остальные элементы в цикле имеют ресурсоемкость O(V) или O(1)
